@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Start a new Zensite focus session.">
+  <title>Zensite | Start a session</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="setup-page">
+  <header class="site-header">
+    <a class="brand" href="page-1.html" aria-label="Zensite home">zensite</a>
+    <button class="icon-button" type="button" aria-label="Open settings" title="Settings">
+      <span aria-hidden="true">&#9881;</span>
+    </button>
+  </header>
+
+  <main class="page-content">
+    <section class="setup-card" aria-labelledby="setup-title">
+      <p class="eyebrow">Make space to focus</p>
+      <h1 id="setup-title">Let’s begin.</h1>
+
+      <form class="setup-form" action="page-2.html">
+        <fieldset class="setup-step step-one">
+          <legend>Are you ready to begin a focus session?</legend>
+          <div class="choice-row">
+            <input class="choice-input" type="radio" name="ready" id="ready-yes" value="yes" required>
+            <label class="choice-button primary-choice" for="ready-yes">I’m ready</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="setup-step step-two">
+          <legend>What is your goal for this session?</legend>
+          <p class="helper-text">Choose one clear thing you would like to make progress on.</p>
+          <label class="sr-only" for="session-goal">Session goal</label>
+          <input class="text-input" id="session-goal" name="goal" type="text" placeholder="Write your goal here..." maxlength="160" required>
+        </fieldset>
+
+        <fieldset class="setup-step step-three">
+          <legend>How long will this session be?</legend>
+          <p class="helper-text">Pick a length that feels both focused and kind.</p>
+          <div class="duration-options">
+            <input class="choice-input" type="radio" name="duration" id="duration-25" value="25" required>
+            <label class="duration-button" for="duration-25">25<span>min</span></label>
+            <input class="choice-input" type="radio" name="duration" id="duration-45" value="45">
+            <label class="duration-button" for="duration-45">45<span>min</span></label>
+            <input class="choice-input" type="radio" name="duration" id="duration-60" value="60">
+            <label class="duration-button" for="duration-60">60<span>min</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="setup-step step-four">
+          <legend>What ambience would you like?</legend>
+          <p class="helper-text">Choose an atmosphere for the background of your session.</p>
+          <label class="sr-only" for="ambience">Ambience</label>
+          <select id="ambience" name="ambience" required>
+            <option value="" selected disabled>Select an ambience</option>
+            <option value="song1">PUT ACTUAL MUSIC HERE</option>
+            <option value="none">No ambience</option>
+          </select>
+        </fieldset>
+
+        <fieldset class="setup-step step-five">
+          <legend>Everything is set.</legend>
+          <p class="helper-text">Your session will begin when you press the button below.</p>
+          <button class="primary-button start-button" type="submit">Begin focus session</button>
+        </fieldset>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">Made for one thing at a time.</footer>
+</body>
+</html>
