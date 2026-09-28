@@ -8,7 +8,7 @@ This project is called Zensite. It is a simple webapp that prompts the user to s
 4. What ambience would you like for the session? : Drop down selection -- selection: provided by me
 5. Begin? : Button
 
-Once the focus session begins, then the timer will begin. During this period, the user will have the option to choose an ambience to play in the background. This ambience will loop while the focus session is running.
+Once the focus session begins, the timer will also begin. During this period, the user will have the option to choose an ambience to play in the background. This ambience will loop while the focus session is running.
 
 Once the focus session is over, an alarm will sound and the user will be prompted a few more questions. The questions go as follows:
 
@@ -43,6 +43,8 @@ Color 3:#ee004b
 Color 4:#9800a3
 Color 5:#17006a
 
+```Fonts```
+We will just use basic fonts, I will be able to change those later when testing.
 
 ```Page Outline```
 
