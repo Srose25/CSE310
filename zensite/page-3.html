@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Zensite focus-session reflection page.">
+  <title>Zensite | Session reflection</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="reflection-page">
+  <header class="site-header">
+    <a class="brand" href="page-3.html" aria-label="Zensite home">zensite</a>
+    <button class="icon-button" type="button" aria-label="Open settings" title="Settings">
+      <span aria-hidden="true">&#9881;</span>
+    </button>
+  </header>
+
+  <main class="page-content">
+    <section class="reflection-card" aria-labelledby="reflection-title">
+      <div class="session-complete" aria-hidden="true">&#10003;</div>
+      <p class="eyebrow">Focus session complete</p>
+      <h1 id="reflection-title">Take a moment to reflect.</h1>
+
+      <form id="reflection-form" novalidate>
+        <fieldset class="prompt active" data-step="1">
+          <legend>How would you rate your performance?</legend>
+          <p class="helper-text">1 means it was difficult to focus; 5 means you felt fully present.</p>
+          <div class="rating-control">
+            <input id="performance" name="performance" type="range" min="1" max="5" value="3" step="1" aria-describedby="performance-value">
+            <output id="performance-value" for="performance">3 — Good</output>
+          </div>
+          <div class="rating-labels" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <button class="primary-button next-button" type="button">Continue</button>
+        </fieldset>
+
+        <fieldset class="prompt" data-step="2" hidden>
+          <legend>What notes do you have?</legend>
+          <p class="helper-text">Capture a thought, a win, or anything you want to remember.</p>
+          <label class="sr-only" for="notes">Session notes</label>
+          <textarea id="notes" name="notes" rows="6" maxlength="1200" placeholder="I noticed that…"></textarea>
+          <p class="character-count"><span id="character-count">0</span>/1200</p>
+          <button class="primary-button next-button" type="button">Continue</button>
+        </fieldset>
+
+        <fieldset class="prompt" data-step="3" hidden>
+          <legend>Would you like to start another session?</legend>
+          <p class="helper-text">You can begin again right away or finish here.</p>
+          <div class="button-row">
+            <button class="primary-button" id="start-another" type="button">Yes, start another</button>
+            <button class="secondary-button" id="finish-session" type="button">No, I’m finished</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="prompt" data-step="4" hidden>
+          <legend>Would you like to save your reflection?</legend>
+          <p class="helper-text">Your information only exists in this tab. Download it now if you want to keep it.</p>
+          <div class="button-row stacked">
+            <button class="primary-button" id="save-json" type="button">Download as JSON</button>
+            <button class="secondary-button" id="save-text" type="button">Download as text</button>
+            <button class="text-button" id="discard-session" type="button">No thanks, finish without saving</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <p class="privacy-note">Your reflection stays in this browser tab and is cleared when you leave.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">Made for one thing at a time.</footer>
+
+  <script>
+    const prompts = [...document.querySelectorAll('.prompt')];
+    const rating = document.querySelector('#performance');
+    const ratingValue = document.querySelector('#performance-value');
+    const notes = document.querySelector('#notes');
+    const characterCount = document.querySelector('#character-count');
+    const ratings = ['Needs work', 'A little distracted', 'Good', 'Strong', 'Excellent'];
+
+    function showStep(step) {
+      prompts.forEach((prompt) => {
+        const isCurrent = Number(prompt.dataset.step) === step;
+        prompt.hidden = !isCurrent;
+        prompt.classList.toggle('active', isCurrent);
+      });
+      const firstControl = document.querySelector(`.prompt[data-step="${step}"] button, .prompt[data-step="${step}"] textarea`);
+      firstControl?.focus();
+    }
+
+    rating.addEventListener('input', () => {
+      ratingValue.value = `${rating.value} — ${ratings[Number(rating.value) - 1]}`;
+      ratingValue.textContent = ratingValue.value;
+    });
+
+    notes.addEventListener('input', () => {
+      characterCount.textContent = notes.value.length;
+    });
+
+    document.querySelectorAll('.next-button').forEach((button) => {
+      button.addEventListener('click', () => showStep(Number(button.closest('.prompt').dataset.step) + 1));
+    });
+
+    document.querySelector('#start-another').addEventListener('click', () => {
+      // Page 1 will replace this destination once it has been built.
+      window.location.assign('page-1.html');
+    });
+
+    document.querySelector('#finish-session').addEventListener('click', () => showStep(4));
+    document.querySelector('#discard-session').addEventListener('click', () => {
+      document.querySelector('.reflection-card').innerHTML = '<div class="session-complete" aria-hidden="true">&#10003;</div><p class="eyebrow">All set</p><h1>Thank you for taking time for yourself.</h1><p class="helper-text">Your reflection has been cleared.</p>';
+    });
+
+    function sessionData() {
+      return {
+        completedAt: new Date().toISOString(),
+        performance: Number(rating.value),
+        performanceLabel: ratings[Number(rating.value) - 1],
+        notes: notes.value.trim()
+      };
+    }
+
+    function download(content, type, filename) {
+      const file = new Blob([content], { type });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(file);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    document.querySelector('#save-json').addEventListener('click', () => {
+      download(JSON.stringify(sessionData(), null, 2), 'application/json', 'zensite-reflection.json');
+    });
+    document.querySelector('#save-text').addEventListener('click', () => {
+      const data = sessionData();
+      download(`Zensite reflection\n\nCompleted: ${data.completedAt}\nPerformance: ${data.performance}/5 — ${data.performanceLabel}\n\nNotes:\n${data.notes || '(No notes entered)'}`, 'text/plain', 'zensite-reflection.txt');
+    });
+  </script>
+</body>
+</html>
