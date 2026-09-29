@@ -55,13 +55,14 @@ button { cursor: pointer; }
 .timer-page.timer-nearly-done, .timer-page.timer-complete { background: radial-gradient(circle at 50% -15%, #453995 0%, var(--sunset-5) 48%, #0c003f 100%); }
 
 .site-header, .site-footer {
-  width: min(1120px, calc(100% - 2.5rem));
+  width: min(1120px, calc(100% - 1.5rem));
+  height: 1em;
   margin-inline: auto;
 }
 
 .site-header {
   display: flex;
-  align-items: center;
+  justify-self: center;
   justify-content: space-between;
   padding-block: 1.5rem;
 }
@@ -70,7 +71,7 @@ button { cursor: pointer; }
 .icon-button { width: 2.75rem; height: 2.75rem; border: 1px solid var(--card-border); border-radius: 50%; color: var(--ink); background: rgb(255 255 255 / 10%); font-size: 1.3rem; }
 .icon-button:hover, .icon-button:focus-visible { background: rgb(255 255 255 / 20%); }
 
-.page-content { display: grid; place-items: center; padding: 2rem 1.25rem; }
+.page-content { display: grid; place-items: center; padding: 1rem 1.25rem; }
 .reflection-card { width: min(100%, 610px); padding: clamp(2rem, 6vw, 4rem); border: 1px solid var(--card-border); border-radius: 1.5rem; background: var(--card); box-shadow: var(--shadow); backdrop-filter: blur(12px); }
 .setup-card { width: min(100%, 610px); padding: clamp(2rem, 6vw, 4rem); border: 1px solid var(--card-border); border-radius: 1.5rem; background: rgb(22 0 57 / 27%); box-shadow: var(--shadow); backdrop-filter: blur(12px); }
 .timer-card { width: min(100%, 610px); padding: clamp(2rem, 6vw, 4rem); border: 1px solid var(--card-border); border-radius: 1.5rem; background: rgb(17 0 62 / 30%); box-shadow: var(--shadow); text-align: center; backdrop-filter: blur(12px); }
@@ -95,13 +96,14 @@ output { min-width: 7.7rem; font-weight: 700; text-align: right; }
 
 .setup-step { display: none; }
 .step-one { display: block; }
+
 .setup-page:has(#ready-yes:checked) .step-two,
-.setup-page:has(#session-goal:valid) .step-three,
+.setup-page:has(#session-goal:valid):has(#goal-confirmed:checked) .step-three,
 .setup-page:has(input[name='duration']:checked) .step-four,
 .setup-page:has(#ambience:valid) .step-five { display: block; animation: fade-in .55s ease both; }
 
 .setup-page:has(#ready-yes:checked) .step-one,
-.setup-page:has(#session-goal:valid) .step-two,
+.setup-page:has(#session-goal:valid):has(#goal-confirmed:checked) .step-two,
 .setup-page:has(input[name='duration']:checked) .step-three,
 .setup-page:has(#ambience:valid) .step-four { display: none; }
 
