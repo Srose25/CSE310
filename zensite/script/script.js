@@ -63,6 +63,7 @@
     if (remainingSeconds === 0) completeSession();
   }
 
+  //This function needs to be removed.
   function chime() {
     const context = new AudioContext();
     [523.25, 659.25, 783.99].forEach((frequency, index) => {
@@ -77,6 +78,7 @@
     });
   }
 
+  
   function completeSession() {
     if (isComplete) return;
     isComplete = true;
@@ -107,6 +109,8 @@
 
   // A soft synthesized noise bed avoids an external audio dependency.
   // Browsers require a direct click before audio can start.
+
+  //This Function needs to be replaced with an audio player
   function startAmbience() {
     audioContext = new AudioContext();
     const bufferSize = audioContext.sampleRate * 2;
