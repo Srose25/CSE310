@@ -96,6 +96,7 @@ output { min-width: 7.7rem; font-weight: 700; text-align: right; }
 
 .setup-step { display: none; }
 .step-one { display: block; }
+.step-four, .step-five{margin-top: 20px;}
 
 .setup-page:has(#ready-yes:checked) .step-two,
 .setup-page:has(#session-goal:valid):has(#goal-confirmed:checked) .step-three,
@@ -108,9 +109,9 @@ output { min-width: 7.7rem; font-weight: 700; text-align: right; }
 .setup-page:has(#ambience:valid) .step-four { display: none; }
 
 .choice-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.choice-row { display: flex; }
-.choice-button, .duration-button { display: inline-flex; align-items: center; justify-content: center; min-height: 3rem; border: 1px solid rgb(255 255 255 / 48%); border-radius: .7rem; color: var(--ink); background: rgb(255 255 255 / 10%); font-weight: 700; cursor: pointer; transition: transform .15s ease, background .15s ease, color .15s ease; }
-.choice-button { padding: .75rem 1.15rem; }
+.choice-row { display: flex; padding: 1.15rem, 1rem; }
+.choice-button, .duration-button { display: inline-flex; align-items: center; justify-content: center; margin-top: 20px; min-height: 3rem; border: 1px solid rgb(255 255 255 / 48%); border-radius: .7rem; color: var(--ink); background: rgb(255 255 255 / 10%); font-weight: 700; cursor: pointer; transition: transform .15s ease, background .15s ease, color .15s ease; }
+.choice-button { margin: 20px, 10px; padding: .75rem 1.15rem; }
 .choice-button:hover, .duration-button:hover { transform: translateY(-2px); background: rgb(255 255 255 / 21%); }
 .choice-input:focus-visible + label { outline: 3px solid #fff; outline-offset: 3px; }
 .primary-choice { border-color: #fff; color: #260054; background: #fff; }
@@ -120,7 +121,7 @@ output { min-width: 7.7rem; font-weight: 700; text-align: right; }
 .choice-input:checked + .duration-button { border-color: #fff; color: #260054; background: #fff; }
 .choice-input:checked + .duration-button span { color: #4a316c; }
 
-.text-input, select { width: 100%; min-height: 3.25rem; border: 1px solid var(--card-border); border-radius: .8rem; padding: .75rem 1rem; color: var(--ink); background: rgb(255 255 255 / 10%); outline-offset: 3px; }
+.text-input, select { width: 100%; min-height: 3.25rem; border: 1px solid var(--card-border); border-radius: .8rem; padding: 1.15rem 1rem; color: var(--ink); background: rgb(255 255 255 / 10%); outline-offset: 3px; }
 .text-input::placeholder { color: #d7cbe8; }
 select { cursor: pointer; }
 select option { color: #21004f; background: #fff; }
