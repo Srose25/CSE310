@@ -8,12 +8,12 @@
     ? requestedMinutes
     : 25;
   const ambience = params.get('ambience') || 'none';
-  const ambienceNames = {
-    rain: 'Gentle rain', 
-    forest: 'Forest morning', 
-    cafe: 'Quiet café', 
-    waves: 'Ocean waves', 
-    none: 'None'
+  const ambienceTracks = {
+    song1: { name: 'In Between Spaces', src: 'assets/dark-aero1.mp3' },
+    song2: { name: 'Locked In', src: 'assets/dark-aero2.mp3' },
+    song3: { name: 'The Search', src: 'assets/dark-aero3.mp3' },
+    song4: { name: 'Flow State', src: 'assets/frutiger-aero1.mp3' },
+    song5: { name: 'In the Depths', src: 'assets/frutiger-aero2.mp3' }
   };
 
   const page = document.querySelector('.timer-page');
@@ -35,12 +35,13 @@
   let timerId;
   let isPaused = false;
   let isComplete = false;
-  let audioContext;
-  let ambienceNode;
+  let ambienceAudio;
+  let alarmAudio;
+  let ambienceWasPlayingBeforePause = false;
 
   progressRing.style.strokeDasharray = String(circleLength);
   goalTitle.textContent = goal;
-  ambienceName.textContent = ambienceNames[ambience] || 'None';
+  ambienceName.textContent = ambienceTracks[ambience]?.name || 'None';
   reflectButton.href = `page-3.html?goal=${encodeURIComponent(goal)}&duration=${durationMinutes}&ambience=${encodeURIComponent(ambience)}`;
 
   function formatTime(seconds) {
@@ -63,18 +64,17 @@
     if (remainingSeconds === 0) completeSession();
   }
 
-  //This function needs to be removed.
+  // Plays the completion alarm once. The audio file is not altered.
   function chime() {
-    const context = new AudioContext();
-    [523.25, 659.25, 783.99].forEach((frequency, index) => {
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.frequency.value = frequency;
-      gain.gain.setValueAtTime(0, context.currentTime + index * 0.18);
-      gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + index * 0.18 + 0.7);
-      oscillator.connect(gain).connect(context.destination);
-      oscillator.start(context.currentTime + index * 0.18);
-      oscillator.stop(context.currentTime + index * 0.18 + 0.7);
+    if (!alarmAudio) {
+      alarmAudio = new Audio('assets/frutiger-alarm.mp3');
+      alarmAudio.preload = 'auto';
+      alarmAudio.loop = false;
+    }
+
+    alarmAudio.currentTime = 0;
+    alarmAudio.play().catch(() => {
+      // Playback can be blocked until the visitor has interacted with the page.
     });
   }
 
@@ -98,19 +98,17 @@
       pauseButton.textContent = 'Pause session';
       timerId = window.setInterval(updateTimer, 250);
       updateTimer();
-      if (ambienceNode) ambienceNode.resume();
+      if (ambienceWasPlayingBeforePause) startAmbience();
     } else {
       isPaused = true;
       clearInterval(timerId);
       pauseButton.textContent = 'Resume session';
-      if (ambienceNode) ambienceNode.suspend();
+      ambienceWasPlayingBeforePause = Boolean(ambienceAudio && !ambienceAudio.paused);
+      if (ambienceWasPlayingBeforePause) ambienceAudio.pause();
     }
   }
 
-  // A soft synthesized noise bed avoids an external audio dependency.
-  // Browsers require a direct click before audio can start.
-
-  //This Function needs to be replaced with an audio player
+  /* Previous white-noise ambience generator (kept disabled):
   function startAmbience() {
     audioContext = new AudioContext();
     const bufferSize = audioContext.sampleRate * 2;
@@ -131,19 +129,50 @@
     ambienceNode = audioContext;
     soundButton.textContent = 'Mute ambience';
   }
+  */
+
+  // Plays the selected MP3 and restarts it whenever it finishes.
+  function startAmbience() {
+    const track = ambienceTracks[ambience];
+    if (!track) return;
+
+    if (!ambienceAudio) {
+      const audio = new Audio(track.src);
+      audio.preload = 'auto';
+      audio.addEventListener('ended', () => {
+        if (isComplete || ambienceAudio !== audio) return;
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+          // The sound button remains available if the browser blocks playback.
+        });
+      });
+      ambienceAudio = audio;
+    }
+
+    ambienceAudio.play().then(() => {
+      soundButton.textContent = 'Mute ambience';
+    }).catch(() => {
+      soundButton.textContent = 'Play ambience';
+    });
+  }
 
   function stopAmbience() {
-    if (!ambienceNode) return;
-    ambienceNode.close();
-    ambienceNode = undefined;
+    if (!ambienceAudio) return;
+    ambienceAudio.pause();
+    ambienceAudio.currentTime = 0;
+    ambienceAudio = undefined;
+    ambienceWasPlayingBeforePause = false;
     soundButton.textContent = 'Play ambience';
   }
 
   pauseButton.addEventListener('click', togglePause);
   endButton.addEventListener('click', completeSession);
-  soundButton.addEventListener('click', () => ambienceNode ? stopAmbience() : startAmbience());
+  soundButton.addEventListener('click', () => {
+    if (ambienceAudio && !ambienceAudio.paused) stopAmbience();
+    else startAmbience();
+  });
 
-  if (ambience !== 'none' && ambienceNames[ambience]) {
+  if (ambienceTracks[ambience]) {
     soundButton.disabled = false;
     soundButton.textContent = 'Play ambience';
   }
