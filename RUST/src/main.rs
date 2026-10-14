@@ -1,27 +1,23 @@
 //! A small Tamagotchi-style desktop prototype built with Rust and egui.
-//! Put the supplied PNG files at the paths near the top of this file before running.
 
 use std::{path::Path, time::{Duration, Instant}};
 
 use eframe::egui::{self, ColorImage, Context, Pos2, Rect, TextureHandle, TextureOptions, Vec2};
 use rand::Rng;
 
-// REPLACE WITH ACTUAL IMAGE: place the provided 8x8 character frames here.
-const SPRITE_FRAME_1_PATH: &str = "RUST/assets/sprite_frame_1.png";
-// REPLACE WITH ACTUAL IMAGE: place the provided 8x8 character frame here.
-const SPRITE_FRAME_2_PATH: &str = "RUST/assets/sprite_frame_2.png";
-// REPLACE WITH ACTUAL IMAGE: place the provided 8x8 character frame here.
-const SPRITE_FRAME_3_PATH: &str = "RUST/assets/sprite_frame_3.png";
-// REPLACE WITH ACTUAL IMAGE: use the supplied left/move button PNG.
-const BUTTON_1_PATH: &str = "RUST/assets/button_1.png";
-// REPLACE WITH ACTUAL IMAGE: use the supplied center/select button PNG.
-const BUTTON_2_PATH: &str = "RUST/assets/button_2.png";
-// REPLACE WITH ACTUAL IMAGE: use the supplied right/back button PNG.
-const BUTTON_3_PATH: &str = "RUST/assets/button_3.png";
+//Assets will need to be placed in target/release/assets to work properly.
+const SPRITE_FRAME_1_PATH: &str = "assets/sprite_frame_1.png";
+const SPRITE_FRAME_2_PATH: &str = "assets/sprite_frame_2.png";
+const SPRITE_FRAME_3_PATH: &str = "assets/sprite_frame_3.png";
+const BUTTON_1_PATH: &str = "assets/button_1.png";
+const BUTTON_2_PATH: &str = "assets/button_2.png";
+const BUTTON_3_PATH: &str = "assets/button_3.png";
 
 const PIXEL_SCALE: f32 = 12.0;
 const PET_SIZE: f32 = 8.0 * PIXEL_SCALE;
 const BUTTON_SIZE: f32 = 8.0 * PIXEL_SCALE;
+
+const BACKGROUND_COLOR: egui::Color32 = egui::Color32::from_rgb(0xFF, 0xFF, 0xFF);
 
 /// Describes the short animation the pet plays after the user selects an emote.
 #[derive(Clone, Copy, PartialEq)]
@@ -65,6 +61,14 @@ impl SpritePetApp {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let now = Instant::now();
         Self {
+            let mut visuals = egui::Visuals::light();
+            visuals.panel_fill = BACKGROUND_COLOR;
+            visuals.window_fill = BACKGROUND_COLOR;
+            visuals.widgets.noninteractive.bg_fill = BACKGROUND_COLOR;
+            visuals.widgets.inactive.bg_fill = BACKGROUND_COLOR;
+            visuals.widgets.hovered.bg_fill = BACKGROUND_COLOR;
+            visuals.widgets.active.bg_fill = BACKGROUND_COLOR;
+            cc.egui_ctx.set_visuals(visuals);
             pet: PetState { position: Pos2::new(320.0, 220.0), destination: Pos2::new(320.0, 220.0), facing_right: false, at_destination: true, looking_until: None, wait_until: now + Duration::from_secs(2) },
             menu_open: false,
             selected_emote: 0,
@@ -163,7 +167,8 @@ impl eframe::App for SpritePetApp {
     /// Repaints the immediate-mode UI every frame, updates the AI, and reacts to button clicks.
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
         ctx.request_repaint();
-        egui::CentralPanel::default().show(ctx, |ui| {
+            // CHANGE `BACKGROUND_COLOR` above to alter this #FFFFFF game canvas.
+            egui::CentralPanel::default().frame(egui::Frame::default().fill(BACKGROUND_COLOR)).show(ctx, |ui| {
             let full = ui.max_rect();
             let play_area = Rect::from_min_max(full.min, Pos2::new(full.max.x, full.max.y - BUTTON_SIZE - 32.0));
             self.update_pet_ai(play_area);
