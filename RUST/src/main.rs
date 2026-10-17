@@ -6,11 +6,11 @@ use eframe::egui::{self, ColorImage, Context, Pos2, Rect, TextureHandle, Texture
 use rand::Rng;
 
 //Assets will need to be placed in target/release/assets to work properly.
-const SPRITE_FRAME_1_PATH: &str = "assets/sprite_frame_1.png";
-const SPRITE_FRAME_2_PATH: &str = "assets/sprite_frame_2.png";
-const SPRITE_FRAME_3_PATH: &str = "assets/sprite_frame_3.png";
-const BUTTON_1_PATH: &str = "assets/button_1.png";
-const BUTTON_2_PATH: &str = "assets/button_2.png";
+const SPRITE_FRAME_1_PATH: &str = "assets/sprite-frame-1.png";
+const SPRITE_FRAME_2_PATH: &str = "assets/sprite-frame-2.png";
+const SPRITE_FRAME_3_PATH: &str = "assets/sprite-frame-3.png";
+const BUTTON_1_PATH: &str = "assets/button_2.png";
+const BUTTON_2_PATH: &str = "assets/button_1.png";
 const BUTTON_3_PATH: &str = "assets/button_3.png";
 
 const PIXEL_SCALE: f32 = 12.0;
@@ -60,15 +60,15 @@ impl SpritePetApp {
     /// Creates initial state and attempts to load each optional PNG texture.
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let now = Instant::now();
+        let mut visuals = egui::Visuals::light();
+        visuals.panel_fill = BACKGROUND_COLOR;
+        visuals.window_fill = BACKGROUND_COLOR;
+        visuals.widgets.noninteractive.bg_fill = BACKGROUND_COLOR;
+        visuals.widgets.inactive.bg_fill = BACKGROUND_COLOR;
+        visuals.widgets.hovered.bg_fill = BACKGROUND_COLOR;
+        visuals.widgets.active.bg_fill = BACKGROUND_COLOR;
+        cc.egui_ctx.set_visuals(visuals);
         Self {
-            let mut visuals = egui::Visuals::light();
-            visuals.panel_fill = BACKGROUND_COLOR;
-            visuals.window_fill = BACKGROUND_COLOR;
-            visuals.widgets.noninteractive.bg_fill = BACKGROUND_COLOR;
-            visuals.widgets.inactive.bg_fill = BACKGROUND_COLOR;
-            visuals.widgets.hovered.bg_fill = BACKGROUND_COLOR;
-            visuals.widgets.active.bg_fill = BACKGROUND_COLOR;
-            cc.egui_ctx.set_visuals(visuals);
             pet: PetState { position: Pos2::new(320.0, 220.0), destination: Pos2::new(320.0, 220.0), facing_right: false, at_destination: true, looking_until: None, wait_until: now + Duration::from_secs(2) },
             menu_open: false,
             selected_emote: 0,
