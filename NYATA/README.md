@@ -1,0 +1,237 @@
+# NYATA
+
+Offline-first Android goal tracker, Version 0.
+
+## First increment
+
+This increment establishes the Expo Router shell, dark visual tokens, four required tabs, and deterministic domain rules for recurrence, timed completion eligibility, streaks, and form validation. The domain is independent of React Native and ready for the SQLite/application layers.
+
+## Windows setup and manual testing
+
+### 1. Fix the PowerShell `npm.ps1` policy error
+
+The error means PowerShell found Node correctly, but Windows is refusing to run the PowerShell wrapper named `npm.ps1`. It does not mean that Node is missing.
+
+The least invasive workaround is to call the Windows command wrapper explicitly from PowerShell:
+
+```powershell
+npm.cmd --version
+npm.cmd install
+npm.cmd test
+npm.cmd run typecheck
+```
+
+You can also allow scripts only for the current PowerShell window. This change disappears when that window closes:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+npm --version
+npm install
+```
+
+If this is your own development machine and you want a persistent per-user setting, use `RemoteSigned` for your user account—not `Unrestricted` for the whole computer:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+Get-ExecutionPolicy -List
+```
+
+If a company or school policy prevents that command, continue using `npm.cmd` or open Command Prompt and run `npm install` there. Do not disable the machine-wide execution policy without administrator/security approval.
+
+### 2. Install and verify the development tools
+
+Install these before attempting the Android build:
+
+1. Node.js LTS for Windows. Close and reopen PowerShell after installation.
+2. Android Studio, including Android SDK, SDK Platform, SDK Platform-Tools, Android Emulator, and an Android Virtual Device.
+3. A 64-bit JDK 17. Android Studio's bundled JDK 25 is not suitable for this project's current Gradle wrapper.
+4. Git for Windows.
+
+Verify each tool from a new PowerShell window:
+
+```powershell
+node --version
+npm.cmd --version
+java -version
+adb version
+git --version
+```
+
+The current machine has the Android SDK at:
+
+```text
+C:\Users\stock\AppData\Local\Android\Sdk
+```
+
+The emulator and ADB are installed and working, but the SDK and Java paths are not currently exposed in a normal PowerShell session. After installing JDK 17, configure the current session as follows, replacing the JDK path with the actual installation folder:
+
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
+$env:ANDROID_HOME = 'C:\Users\stock\AppData\Local\Android\Sdk'
+$env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
+$env:Path = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:ANDROID_HOME\emulator;$env:Path"
+
+java -version
+adb version
+adb devices -l
+```
+
+For future terminals, add the same `JAVA_HOME`, `ANDROID_HOME`, and `ANDROID_SDK_ROOT` values to the user environment variables, and add these directories to the user `Path`:
+
+```text
+%JAVA_HOME%\bin
+%ANDROID_HOME%\platform-tools
+%ANDROID_HOME%\emulator
+```
+
+If `adb` is not recognized, add the Android SDK `platform-tools` directory to the user `Path`. The usual location is:
+
+```text
+C:\Users\<your-user>\AppData\Local\Android\Sdk\platform-tools
+```
+
+Android Studio shows the exact SDK location under **More Actions → SDK Manager**. After changing `Path`, open a new terminal and run `adb version` again.
+
+### 3. Install project dependencies
+
+From the repository root—the folder containing `package.json`—run:
+
+```powershell
+cd 'C:\Users\<your-user>\Documents\CSE310\NYATA'
+npm.cmd install
+npm.cmd run typecheck
+npm.cmd test
+```
+
+Expected results:
+
+- `npm.cmd install` creates `node_modules` and `package-lock.json`.
+- `npm.cmd run typecheck` finishes without TypeScript errors.
+- `npm.cmd test` runs the domain/application tests.
+
+If npm reports a peer-dependency problem, do not immediately use `--force`. First run `npm.cmd ls` and capture the error; the Expo package versions should remain aligned with the versions in `package.json`.
+
+### 4. Create and start an Android emulator
+
+In Android Studio:
+
+1. Open **More Actions → SDK Manager** and install an Android API level supported by the installed Expo SDK, plus **Android SDK Platform-Tools** and **Android Emulator**.
+2. Open **More Actions → Virtual Device Manager**.
+3. Create a phone-sized device using an `x86_64` system image when available.
+4. Start the emulator and leave it running.
+5. From PowerShell, verify the connection:
+
+```powershell
+adb devices
+```
+
+The emulator should appear with status `device`, not `offline`.
+
+### 5. Run the app in the development workflow
+
+For the first UI smoke test:
+
+```powershell
+npm.cmd start -- --offline --max-workers 1
+```
+
+This starts Metro without a registry request and uses one worker, which avoids the Windows worker-spawn issue observed on this machine. Press `a` only after Expo Go or the NYATA development build is installed on the emulator.
+
+For the native Android development build used by SQLite and notification work:
+
+```powershell
+npm.cmd run android
+```
+
+This command compiles and installs a native debug build, then starts Metro; it does not install or launch the emulator by itself. The first native build can take several minutes while Gradle downloads and compiles dependencies. Keep the emulator unlocked. If Gradle cannot find Java, verify `java -version` and configure `JAVA_HOME` to the JDK 17 installation before retrying.
+
+Once the native build has succeeded, JavaScript-only changes can normally use:
+
+```powershell
+npm.cmd start -- --offline --max-workers 1
+```
+
+### 6. Manual Version 0 smoke test
+
+Run these checks after the app opens:
+
+1. Confirm the app opens to the dark Dashboard tab and all four tabs are reachable.
+2. Confirm the empty Dashboard, Calendar, and Tracking states are readable and do not crash.
+3. Confirm Settings explains that data is local-only and offline-first.
+4. Force-close and relaunch the app; verify it starts normally.
+5. Once goal creation is connected, create a one-time goal and a recurring goal, then verify calendar placement, timed completion blocking, single XP award, and recurring-only tracking.
+6. On a development build, test notification permission denied, scheduling, cancellation, app restart, and emulator date/time changes.
+7. Disable Wi-Fi or enable airplane mode and repeat the core goal flow; no network should be required.
+
+Record the Windows version, Android API level, emulator/device model, app build command, and any failure logs with each test result. Android notification timing must also be checked on a physical device because battery optimization and manufacturer policies can differ from the emulator.
+
+### 7. Useful recovery commands
+
+Use these only from the repository root:
+
+```powershell
+npm.cmd run typecheck
+npm.cmd test -- --runInBand
+npx.cmd expo-doctor
+adb devices
+```
+
+If the Metro bundler is stuck, stop it with `Ctrl+C` and restart with:
+
+```powershell
+npx.cmd expo start -c
+```
+
+The current repository contains the app shell, domain tests, and initial schema. Goal screens, SQLite repositories, notification adapters, and chart rendering are still implementation work; the smoke-test items referring to those features become applicable as those increments land.
+
+## Troubleshooting log — 2026-11-11
+
+The Windows environment was repaired as far as possible during the first setup session:
+
+- PowerShell blocks `npm.ps1`; use `npm.cmd` and `npx.cmd` from PowerShell.
+- The failed `npx expo install react-native-web` attempt added an incomplete web dependency. The manifest now explicitly pins `react-dom` to `19.1.0` and `react-native-web` to `~0.21.0`, which match the project’s React 19.1 setup and satisfy Expo Router’s peer requirements.
+- Expo’s compatibility warnings were addressed: React Native is `0.81.5`, Jest is `~29.7.0`, and `@types/jest` is `^29.5.14`.
+- `package-lock.json` was regenerated from the corrected manifest.
+- A stale Node/Expo process and a partially extracted `node_modules` tree caused repeated Windows `EPERM`/`ENOTEMPTY` errors. The stale process was stopped and the project dependency directory was rebuilt.
+- At the time work was paused, these core package files existed: `node_modules/react-native/package.json`, `node_modules/typescript/package.json`, `node_modules/expo-router/package.json`, and `node_modules/react-native-web/package.json`.
+
+The initial setup session ended before verification. Subsequent verification from the project root completed the typecheck, Jest run, Expo Doctor run, Metro startup, and ADB connection checks. To repeat the local checks:
+
+```powershell
+Set-Location 'C:\Users\stock\Documents\CSE310\NYATA'
+npm.cmd run typecheck
+npm.cmd test -- --runInBand
+npx.cmd expo-doctor
+adb devices -l
+```
+
+If the emulator is listed with status `device`, continue with the native build instructions below. Do not run another install unless one of the checks reports missing packages.
+
+### Follow-up status — 2026-11-11
+
+The checks were resumed successfully:
+
+- `npm.cmd run typecheck` passes.
+- Jest passes: 4 suites and 6 tests.
+- Expo Doctor previously passed all 18 checks after the clean dependency install. Running it now may require registry access because `expo-doctor` is not a project dependency.
+- ADB is installed at `C:\Users\stock\AppData\Local\Android\Sdk\platform-tools\adb.exe` and the emulator is connected as `emulator-5554` with status `device`. ADB is not currently on the normal PowerShell `Path`.
+- `npm.cmd start -- --offline --max-workers 1` starts Metro successfully. The `--offline` flag avoids a registry fetch failure, and `--max-workers 1` avoids a Windows worker-spawn `EPERM` issue in this environment.
+- The emulator does not have Expo Go installed, so its `exp://` link cannot open directly.
+- `npm.cmd run android -- --no-install` generated the native `android` directory. The current shell cannot resolve ADB unless the SDK path is supplied, and the native build requires Java 17. Android Studio’s bundled JDK is Java 25, which previously caused `Unsupported class file major version 69`.
+- Temurin JDK 17 was downloaded but its Windows MSI installation was cancelled before completion. JDK 17 installation and persistent environment configuration are therefore the remaining machine-level setup steps.
+
+Once JDK 17 is installed and the Android paths are configured, rerun:
+
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
+$env:ANDROID_HOME = 'C:\Users\stock\AppData\Local\Android\Sdk'
+$env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
+$env:Path = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:ANDROID_HOME\emulator;$env:Path"
+java -version
+adb devices -l
+npm.cmd run android -- --no-install
+```
+
+## Next increment
+
+Add SQLite migrations/repositories and an application service for goal creation, occurrence materialization, and idempotent completion/XP transactions. Keep UI routes dependent on those services rather than raw SQL.

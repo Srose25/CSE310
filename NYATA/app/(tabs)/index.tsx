@@ -1,0 +1,5 @@
+import { StyleSheet, Text, View } from 'react-native';
+import { colors, typography } from '@/src/theme/tokens';
+export default function Dashboard() { return <View style={styles.page}><Text style={styles.kicker}>NYATA / TODAY</Text><Text style={styles.title}>Make today count.</Text><View style={styles.card}><Text style={styles.label}>DAILY XP</Text><Text style={styles.xp}>0 <Text style={styles.target}>/ 100</Text></Text><Text style={styles.muted}>No goals yet. Add one from Calendar to begin.</Text></View></View>; }
+const styles = StyleSheet.create({ page: { flex: 1, padding: 24, paddingTop: 80, backgroundColor: colors.background }, kicker: { color: colors.muted, letterSpacing: 2, fontSize: 12 }, title: { color: colors.text, fontFamily: typography.serif, fontSize: 36, marginTop: 12, marginBottom: 32 }, card: { borderColor: colors.border, borderWidth: 1, borderRadius: 16, padding: 24 }, label: { color: colors.muted, letterSpacing: 1, fontSize: 12 }, xp: { color: colors.text, fontSize: 48, fontWeight: '700', marginTop: 8 }, target: { color: colors.muted, fontSize: 20, fontWeight: '400' }, muted: { color: colors.muted, marginTop: 16, lineHeight: 22 } });
+

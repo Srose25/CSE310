@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "NYATA",
+    "slug": "nyata",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "scheme": "nyata",
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "android": {
+      "package": "com.nyata.app"
+    }
+  }
+}
