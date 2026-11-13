@@ -1,0 +1,9 @@
+{
+  "terminal.integrated.env.windows": {
+    "Path": "C:\\Users\\stock\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\node-runtime;${env:Path}",
+    "NODE_BINARY": "C:\\Users\\stock\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\node-runtime\\node.exe",
+    "GRADLE_USER_HOME": "${env:USERPROFILE}\\.gradle-nyata",
+    "JAVA_TOOL_OPTIONS": "-Djavax.net.ssl.trustStoreType=Windows-ROOT",
+    "EXPO_NO_TELEMETRY": "1"
+  }
+}

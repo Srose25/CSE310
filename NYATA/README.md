@@ -6,6 +6,18 @@ Offline-first Android goal tracker, Version 0.
 
 This increment establishes the Expo Router shell, dark visual tokens, four required tabs, and deterministic domain rules for recurrence, timed completion eligibility, streaks, and form validation. The domain is independent of React Native and ready for the SQLite/application layers.
 
+## Technology stack
+
+- Expo SDK 54 with Expo Router 6.
+- React 19.1 and React Native 0.81.5.
+- TypeScript 5.9 with strict type checking.
+- Jest 29 with `jest-expo` for domain and application tests.
+- Native Android builds through Gradle 8.14.3 and JDK 17.
+- Android SDK Platform 36, Build Tools 35, NDK 27.1.12297006, and CMake 3.22.1.
+- Offline-first architecture. SQLite migrations/schema exist; repositories and goal creation are the next increment.
+
+The committed `package-lock.json` is authoritative. Use `npm.cmd ci` for a clean install and avoid `--force` or `--legacy-peer-deps` unless a dependency conflict has been investigated.
+
 ## Development handoff — 2026-11-12
 
 This section is the current source of truth for the next engineering agent. The original Windows machine is out of disk space, so continue development on a stronger machine. Do not copy large generated directories or caches from the old machine unless there is a specific reason.
@@ -207,14 +219,14 @@ From the repository root—the folder containing `package.json`—run:
 
 ```powershell
 cd 'C:\Users\<your-user>\Documents\CSE310\NYATA'
-npm.cmd install
+npm.cmd ci
 npm.cmd run typecheck
-npm.cmd test
+npm.cmd test -- --runInBand
 ```
 
 Expected results:
 
-- `npm.cmd install` creates `node_modules` and `package-lock.json`.
+- `npm.cmd ci` recreates `node_modules` exactly from `package-lock.json`.
 - `npm.cmd run typecheck` finishes without TypeScript errors.
 - `npm.cmd test` runs the domain/application tests.
 
@@ -291,6 +303,22 @@ If the Metro bundler is stuck, stop it with `Ctrl+C` and restart with:
 npx.cmd expo start -c
 ```
 
+### 8. Troubleshooting practices
+
+- Read the first Gradle error, not the final Expo `spawnAsync` message; Expo reports the wrapper failure after Gradle prints the cause.
+- If the Foojay plugin cannot be found, use a writable external Gradle cache such as `C:\Users\stock\.gradle-nyata` and configure Java to use the Windows certificate store.
+- If Gradle cannot create or move a transform workspace, stop Gradle daemons and keep `GRADLE_USER_HOME` outside the repository.
+- If Gradle cannot start `node`, put the real Node runtime first on `Path` and set `NODE_BINARY` to its `node.exe`. The VS Code `node.cmd` shim can fail when launched by Java/Gradle.
+- If `adb devices` is empty, restart ADB, start the AVD manually, and wait until `sys.boot_completed` is `1`. The emulator must report `device`, not `offline`.
+- If Android shows “Process System isn’t responding” before NYATA is installed, cold-boot or recreate the AVD before debugging app code.
+- Capture app logs only after confirming that `com.nyata.app` is installed and focused:
+
+```powershell
+adb logcat -c
+adb shell monkey -p com.nyata.app 1
+adb logcat -d -v time | Select-String 'AndroidRuntime|ReactNativeJS|com.nyata.app'
+```
+
 The current repository contains the app shell, domain tests, and initial schema. Goal screens, SQLite repositories, notification adapters, and chart rendering are still implementation work; the smoke-test items referring to those features become applicable as those increments land.
 
 ## Troubleshooting log — 2026-11-11
@@ -339,6 +367,49 @@ $env:Path = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:ANDROID_HO
 java -version
 adb devices -l
 npm.cmd run android -- --no-install
+```
+
+## Run (PowerShell copy/paste)
+
+Run these commands from the `NYATA` folder in a new PowerShell terminal:
+
+```powershell
+$nodeRuntime = 'C:\Users\stock\AppData\Local\Programs\Microsoft VS Code\bin\node-runtime'
+$env:Path = "$nodeRuntime;$env:Path"
+$env:NODE_BINARY = "$nodeRuntime\node.exe"
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-17'
+$env:JAVA_TOOL_OPTIONS = '-Djavax.net.ssl.trustStoreType=Windows-ROOT'
+$env:GRADLE_USER_HOME = 'C:\Users\stock\.gradle-nyata'
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+$env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
+$env:ANDROID_USER_HOME = "$env:USERPROFILE\.android"
+$env:ANDROID_SDK_HOME = $env:USERPROFILE
+$env:Path = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:ANDROID_HOME\emulator;$env:Path"
+
+New-Item -ItemType Directory -Force $env:ANDROID_USER_HOME | Out-Null
+adb kill-server
+adb start-server
+adb devices -l
+```
+
+Start the emulator if it is not already running:
+
+```powershell
+emulator -avd Medium_Phone_API_37.0 -gpu auto
+```
+
+After the emulator reports `device`, build, install, and launch NYATA:
+
+```powershell
+adb wait-for-device
+while ((adb shell getprop sys.boot_completed).Trim() -ne '1') { Start-Sleep -Seconds 2 }
+npm.cmd run android -- --no-install
+```
+
+For JavaScript-only changes after the native app is installed:
+
+```powershell
+npm.cmd start -- --offline --max-workers 1
 ```
 
 ## Next increment
